@@ -20,6 +20,7 @@ func main() {
 
 	for i := range typrR.NumField() {
 		field := typrR.Field(i)
+
 		switch field.Type.Kind() {
 		case reflect.String:
 			r.Field(i).SetString("NewString")
