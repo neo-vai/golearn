@@ -14,7 +14,7 @@ func rF64(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
-type Shape3D interface {
+type Shape3t interface {
 	Vol() float64
 }
 
