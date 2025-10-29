@@ -153,32 +153,37 @@ func clearTel(s string) string {
 	}, s)
 }
 
+func setCSVFILE() error {
+	if filepath := os.Getenv("PHONEBOOK"); filepath != "" {
+		CSVFILEPATH = filepath
+	}
+
+	_, err := os.Stat(CSVFILEPATH)
+	if err != nil {
+		fmt.Println("Creating...", CSVFILEPATH)
+		f, err := os.Create(CSVFILEPATH)
+		if err != nil {
+			return err
+		}
+		f.Close()
+	}
+
+	fileinfo, err := os.Stat(CSVFILEPATH)
+	if !fileinfo.Mode().IsRegular() {
+		return fmt.Errorf("%s not a regular file", CSVFILEPATH)
+	}
+	return nil
+}
+
 func main() {
 	if len(os.Args) <= 1 {
 		fmt.Println("Usage: insert|delete|search|list <arguments>")
 		return
 	}
 
-	if _, err := os.Stat(CSVFILEPATH); err != nil {
-		fmt.Println("Creating", CSVFILEPATH)
-		f, err := os.Create(CSVFILEPATH)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		f.Close()
-
-	}
-
-	fileinfo, err := os.Stat(CSVFILEPATH)
+	err := setCSVFILE()
 	if err != nil {
 		fmt.Println(err)
-		return
-	}
-
-	mode := fileinfo.Mode()
-	if !mode.IsRegular() {
-		fmt.Println(CSVFILEPATH, "is not Reguarl file!")
 		return
 	}
 
@@ -187,7 +192,7 @@ func main() {
 		return
 	}
 
-	if err = createIndex(); err != nil {
+	if err := createIndex(); err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -257,7 +262,7 @@ func main() {
 
 		return
 
-	case "lsit":
+	case "list":
 		printList()
 		return
 
