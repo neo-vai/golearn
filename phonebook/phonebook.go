@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -17,8 +18,26 @@ type Entry struct {
 	LastAccess string
 }
 
-var data []Entry
+type Phonebook []Entry
+var data Phonebook = Phonebook{}
 var index map[string]int
+
+func (p Phonebook) Len() int {
+	return len(p)
+}
+
+func (p Phonebook) Less(f, j int) bool {
+	if p[f].Name != p[j].Name {
+		return p[f].Name < p[j].Name
+	} else if p[f].SurName != p[j].SurName {
+		return p[f].Name < p[j].Name
+	}
+	return false
+}
+
+func (p Phonebook) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+}
 
 var CSVFILEPATH = "./csv.data"
 
@@ -105,8 +124,7 @@ func insert(pS *Entry) error {
 	return nil
 }
 
-func deleteEntry(key string) error {
-	i, ok := index[key]
+func deleteEntry(key string) error { i, ok := index[key]
 	if !ok {
 		return fmt.Errorf("%s cannot be found!", key)
 	}
@@ -177,7 +195,7 @@ func setCSVFILE() error {
 
 func main() {
 	if len(os.Args) <= 1 {
-		fmt.Println("Usage: insert|delete|search|list <arguments>")
+		fmt.Println("Usage: insert|delete|search|list|sort <arguments>")
 		return
 	}
 
@@ -265,6 +283,22 @@ func main() {
 	case "list":
 		printList()
 		return
+	
+	case "sort":
+		if len(os.Args) > 2 {
+			if os.Args[2] == "reverse" {
+				sort.Sort(sort.Reverse(data))
+			} else {
+				fmt.Println("Usage: sort <reverse(optional)>")
+				return
+			}
+		} else {
+			sort.Sort(data)
+		}
+
+		if err := saveCSV(CSVFILEPATH); err != nil {
+			fmt.Println(err)
+		}
 
 	default:
 		fmt.Println("Not a valid option")
